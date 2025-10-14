@@ -1,22 +1,21 @@
 #!/bin/bash
 
-
 FILE=/K8sCp
-if [ -f "$FILE" ]: then
+if [ -f "$FILE" ]; then
   echo "Script is already run"
   echo "$FILE exists..."
   echo "Exiting"
   exit 1
 else
-  echo "Running script...." 
-
+  echo "Running script...."
+fi
 
 sudo touch /K8sCp
 
 sudo apt update && sudo apt upgrade -y
 
 # Install required packages
-sudo apt install ca-certificates curl apt-transport-https gpg -y 
+sudo apt install ca-certificates curl apt-transport-https gpg -y
 
 # Disable swap for current session
 sudo swapoff -a
@@ -32,8 +31,7 @@ sudo chmod a+r /etc/apt/keyrings/docker.asc
 # Add the repository to Apt sources:
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 sudo apt-get update && sudo apt-get install containerd.io -y
 
 sudo mkdir -p /etc/containerd
@@ -57,9 +55,8 @@ rm -f crictl-$VERSION-linux-amd64.tar.gz
 
 # Set the endpoints to avoid the deprecation error
 sudo crictl config --set \
-runtime-endpoint=unix:///run/containerd/containerd.sock \
---set image-endpoint=unix:///run/containerd/containerd.sock
-
+  runtime-endpoint=unix:///run/containerd/containerd.sock \
+  --set image-endpoint=unix:///run/containerd/containerd.sock
 
 # sysctl params required by setup, params persist across reboots
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
@@ -86,7 +83,6 @@ sudo sysctl --system
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-
 sudo apt-get install -y kubelet kubeadm kubectl
 
 sudo apt-mark hold kubelet kubeadm kubectl
@@ -111,7 +107,6 @@ sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 
 rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
-
 cilium install --version 1.18.2
 
 sleep 5
@@ -124,12 +119,9 @@ chmod 700 get_helm.sh
 sleep 5
 
 sudo crictl config --set \
-runtime-endpoint=unix:///run/containerd/containerd.sock \
---set image-endpoint=unix:///run/containerd/containerd.sock
-
+  runtime-endpoint=unix:///run/containerd/containerd.sock \
+  --set image-endpoint=unix:///run/containerd/containerd.sock
 
 echo '############################'
 echo 'Congrants🎉 Installation has finished!'
 echo '############################'
-
-
