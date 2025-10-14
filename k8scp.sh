@@ -83,6 +83,8 @@ sudo sysctl --system
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
+sudo apt update
+
 sudo apt-get install -y kubelet kubeadm kubectl
 
 sudo apt-mark hold kubelet kubeadm kubectl
@@ -90,6 +92,10 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl enable --now kubelet
 
 sudo kubeadm init --kubernetes-version=1.33.5 --pod-network-cidr=10.224.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ###########################
 # Installing cilium add-on
@@ -121,7 +127,3 @@ sleep 5
 sudo crictl config --set \
   runtime-endpoint=unix:///run/containerd/containerd.sock \
   --set image-endpoint=unix:///run/containerd/containerd.sock
-
-echo '############################'
-echo 'Congrants🎉 Installation has finished!'
-echo '############################'
