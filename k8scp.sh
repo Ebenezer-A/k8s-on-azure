@@ -61,7 +61,8 @@ sudo crictl config --set \
 # sysctl params required by setup, params persist across reboots
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.ipv4.ip_forward = 1
-net.ipv6.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
 EOF
 
 # Apply sysctl params without reboot
@@ -85,13 +86,12 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 
 sudo apt update
 
-sudo apt-get install -y kubelet kubeadm kubectl
-
+sudo apt-get install -y kubelet=1.33.1-1.1 kubeadm=1.33.1-1.1 kubectl=1.33.1-1.1
 sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
-sudo kubeadm init --kubernetes-version=1.33.5 --pod-network-cidr=10.224.0.0/16
+sudo kubeadm init --kubernetes-version=1.33.1 --pod-network-cidr=10.224.0.0/16
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
