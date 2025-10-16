@@ -2,15 +2,29 @@
 
 FILE=/K8sWorker
 if [ -f "$FILE" ]; then
-  echo "Script is already run"
-  echo "$FILE exists..."
-  echo "Exiting"
-  exit 1
+  echo "Script has already been run."
+
+  read -p "Do you want to reset the cluster and run it again? (y/N): " answer
+  case "$answer" in
+  [yY] | [yY][eE][sS])
+    echo "Resetting cluster..."
+
+    sudo kubeadm reset -f
+
+    sudo systemctl restart kubelet
+
+    echo "Running script ..."
+    ;;
+  *)
+    echo "Exiting without changes."
+    exit 0
+    ;;
+  esac
 else
-  echo "Running script...."
+  echo "Running script for the first time..."
 fi
 
-sudo touch /K8sCp
+sudo touch /K8sWorker
 
 sudo apt update && sudo apt upgrade -y
 
@@ -89,6 +103,6 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
-echo '*******************'
+echo '-------------------'
 echo 'Node ready to join cluster'
-echo '*******************'
+echo '-------------------'

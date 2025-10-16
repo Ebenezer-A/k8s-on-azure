@@ -135,13 +135,18 @@ resource "azurerm_public_ip" "worker_ip" {
 }
 
 # -------------------------------
-# Virtual Machines
+# SSH Key. Aleardy exists in azure.
+# If you want create a new one replace data with resource
+# Read terraform docs for further instractions
 # -------------------------------
 data "azurerm_ssh_public_key" "control_plane_key" {
   name                = "control-panel_key"
   resource_group_name = data.azurerm_resource_group.k8s_rg.name
 }
 
+# -------------------------------
+# Virtual Machines
+# -------------------------------
 resource "azurerm_linux_virtual_machine" "control_plane" {
   name                = "control-plane"
   resource_group_name = data.azurerm_resource_group.k8s_rg.name
@@ -174,6 +179,21 @@ resource "azurerm_linux_virtual_machine" "control_plane" {
   tags = {
     role = "control-plane"
   }
+
+  user_data = base64encode(<<EOF
+      #!/bin/bash
+
+      cd $HOME
+
+      git clone https://github.com/Ebenezer-A/k8s-on-azure.git
+      
+      cd k8s-on-azure
+
+      git checkout main
+
+      ./k8scp.sh
+  EOF
+)
 }
 
 resource "azurerm_linux_virtual_machine" "worker" {
@@ -207,5 +227,20 @@ resource "azurerm_linux_virtual_machine" "worker" {
   tags = {
     role = "worker"
   }
+  
+  user_data = base64encode(<<EOF
+      #!/bin/bash
+
+      cd $HOME
+
+      git clone https://github.com/Ebenezer-A/k8s-on-azure.git
+      
+      cd k8s-on-azure
+
+      git checkout main
+
+      ./k8sworker-node.sh
+  EOF
+)
 }
 

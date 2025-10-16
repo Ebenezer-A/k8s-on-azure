@@ -2,12 +2,29 @@
 
 FILE=/K8sCp
 if [ -f "$FILE" ]; then
-  echo "Script is already run"
-  echo "$FILE exists..."
-  echo "Exiting"
-  exit 1
+  echo "Script has already been run."
+
+  read -p "Do you want to reset the cluster and run it again? (y/N): " answer
+  case "$answer" in
+  [yY] | [yY][eE][sS])
+    echo "Resetting cluster..."
+
+    cilium uninstall # Remove Cilium
+    sudo rm -rf /etc/cni/net.d/*
+
+    sudo kubeadm reset -f
+
+    sudo systemctl restart kubelet
+
+    echo "Cluster removed. Running script ..."
+    ;;
+  *)
+    echo "Exiting without changes."
+    exit 0
+    ;;
+  esac
 else
-  echo "Running script...."
+  echo "Running script for the first time..."
 fi
 
 sudo touch /K8sCp
@@ -114,6 +131,8 @@ rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 cilium install --version 1.18.2
 
 sleep 5
+
+kubeadm token create --print-join-command | tee ~/kubeadm-join.sh
 
 # Installing help using scrip
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
