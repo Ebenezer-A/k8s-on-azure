@@ -11,12 +11,14 @@ terraform {
 provider "azurerm" {
   features {}
 
-  subscription_id = "8a31bb52-0c7e-42a9-855c-4a2e67450e37"
-  tenant_id = "b8d555e0-9373-4a32-baab-030117872aad"
+  subscription_id = var.subscription_id
+  tenant_id = var.tenant_id
 }
 
 # -------------------------------
-# Resource Group
+# Resource Group Already exists in my account
+# If you want terraform to create it change the data to resource
+# And remove the data prefix from other resource referance
 # -------------------------------
 data "azurerm_resource_group" "k8s_rg" {
   name     = "Kubernetes"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=/K8sCp
+FILE=/K8sWorker
 if [ -f "$FILE" ]; then
   echo "Script is already run"
   echo "$FILE exists..."
@@ -84,44 +84,11 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 
 sudo apt update
 
-sudo apt-get install -y kubelet=1.33.5 kubeadm=1.33.5 kubectl=1.33.5
+sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl enable --now kubelet
 
-sudo kubeadm init --kubernetes-version=1.33.5 --pod-network-cidr=10.224.0.0/16
-
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-###########################
-# Installing cilium add-on
-###########################
-CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
-
-CLI_ARCH=amd64
-
-if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
-
-curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
-
-sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
-
-rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-
-cilium install --version 1.18.2
-
-sleep 5
-
-# Installing help using scrip
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-
-sleep 5
-
-sudo crictl config --set \
-  runtime-endpoint=unix:///run/containerd/containerd.sock \
-  --set image-endpoint=unix:///run/containerd/containerd.sock
+echo '*******************'
+echo 'Node ready to join cluster'
+echo '*******************'
