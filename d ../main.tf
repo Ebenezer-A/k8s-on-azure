@@ -180,6 +180,20 @@ resource "azurerm_linux_virtual_machine" "control_plane" {
     role = "control-plane"
   }
 
+  user_data = base64encode(<<EOF
+      #!/bin/bash
+
+      cd /home/azureuser
+
+      git clone https://github.com/Ebenezer-A/k8s-on-azure.git
+      
+      cd k8s-on-azure
+
+      git checkout main
+
+      ./k8scp.sh
+  EOF
+)
 }
 
 resource "azurerm_linux_virtual_machine" "worker" {
@@ -213,6 +227,20 @@ resource "azurerm_linux_virtual_machine" "worker" {
   tags = {
     role = "worker"
   }
- 
+  
+  user_data = base64encode(<<EOF
+      #!/bin/bash
+
+      cd /home/azureuser
+
+      git clone https://github.com/Ebenezer-A/k8s-on-azure.git
+      
+      cd k8s-on-azure
+
+      git checkout main
+
+      ./k8sworker-node.sh
+  EOF
+)
 }
 
