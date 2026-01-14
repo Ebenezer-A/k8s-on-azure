@@ -1,0 +1,10 @@
+# Azure Subscription and Tenant Configuration
+# Copy this file to terraform.tfvars and fill in your actual values
+
+# Your Azure Subscription ID
+# Get this by running: az account show --query id -o tsv
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Your Azure Tenant ID
+# Get this by running: az account show --query tenantId -o tsv
+tenant_id = "00000000-0000-0000-0000-000000000000"
